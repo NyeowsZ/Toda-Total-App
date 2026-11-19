@@ -1,0 +1,214 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Android APK build variant'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+          - release
+          - debug
+      architectures:
+        description: 'Target CPU architectures (arm64-v8a is faster & smaller for modern phones)'
+        required: true
+        default: 'arm64-v8a'
+        type: choice
+        options:
+          - arm64-v8a
+          - arm64-v8a,armeabi-v7a
+          - all
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android-apk:
+    name: Build Android APK (${{ inputs.build_type || 'release' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      BUILD_TYPE: ${{ inputs.build_type || 'release' }}
+      REACT_NATIVE_ARCHS: ${{ inputs.architectures || 'arm64-v8a' }}
+      EXPO_NO_TELEMETRY: '1'
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.caching=true'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Java 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle & Gradle Caching
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Cache Expo & Metro build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.expo
+            .expo
+            /tmp/metro-cache
+          key: ${{ runner.os }}-expo-metro-${{ hashFiles('bun.lock', 'app.json', 'metro.config.js', 'src/global.css') }}
+          restore-keys: |
+            ${{ runner.os }}-expo-metro-
+
+      - name: Cache Android native C++ builds (ccache)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ env.REACT_NATIVE_ARCHS }}-${{ hashFiles('bun.lock', 'app.json') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-${{ env.REACT_NATIVE_ARCHS }}-
+            ${{ runner.os }}-ccache-
+
+      - name: Install ccache for faster native NDK rebuilds
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ccache
+          ccache --max-size=2G
+          ccache --zero-stats
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck & Lint
+        run: |
+          bunx tsc --noEmit
+          bun run lint
+
+      - name: Run Expo Prebuild (Android)
+        run: bunx expo prebuild --platform android --clean --non-interactive
+
+      - name: Configure Gradle caching and target architectures
+        run: |
+          {
+            echo ""
+            echo "org.gradle.caching=true"
+            echo "org.gradle.parallel=true"
+            echo "org.gradle.daemon=false"
+            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g"
+          } >> android/gradle.properties
+
+          if [ "$REACT_NATIVE_ARCHS" != "all" ]; then
+            sed -i '/^reactNativeArchitectures=/d' android/gradle.properties
+            echo "reactNativeArchitectures=${REACT_NATIVE_ARCHS}" >> android/gradle.properties
+          fi
+
+      - name: Build Android APK
+        working-directory: android
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          NDK_CCACHE: ccache
+        run: |
+          chmod +x gradlew
+          if [ "$BUILD_TYPE" = "debug" ]; then
+            ./gradlew assembleDebug --build-cache --no-daemon
+          else
+            ./gradlew assembleRelease --build-cache --no-daemon
+          fi
+
+      - name: Show ccache stats
+        run: ccache --show-stats || true
+
+      - name: Sign & Package APK artifact
+        id: package_apk
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          if [ "$BUILD_TYPE" = "debug" ]; then
+            SRC_APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          else
+            SRC_APK="android/app/build/outputs/apk/release/app-release.apk"
+          fi
+
+          if [ ! -f "$SRC_APK" ]; then
+            echo "Expected APK not found at $SRC_APK"
+            find android/app/build/outputs/apk -type f || true
+            exit 1
+          fi
+
+          mkdir -p artifacts
+          APK_NAME="linear-tally-terminal-${BUILD_TYPE}-${SHORT_SHA}.apk"
+          OUT_APK="artifacts/${APK_NAME}"
+
+          if [ "$BUILD_TYPE" = "release" ] && [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            KEYSTORE_FILE="/tmp/release.keystore"
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_FILE"
+            BUILD_TOOLS_DIR="$(ls -d "${ANDROID_HOME:-$ANDROID_SDK_ROOT}"/build-tools/* | sort -V | tail -n 1)"
+            "${BUILD_TOOLS_DIR}/zipalign" -f -p 4 "$SRC_APK" "${OUT_APK}.aligned"
+            "${BUILD_TOOLS_DIR}/apksigner" sign \
+              --ks "$KEYSTORE_FILE" \
+              --ks-key-alias "$ANDROID_KEY_ALIAS" \
+              --ks-pass "env:ANDROID_KEYSTORE_PASSWORD" \
+              --key-pass "env:ANDROID_KEY_PASSWORD" \
+              --out "$OUT_APK" \
+              "${OUT_APK}.aligned"
+            rm -f "$KEYSTORE_FILE" "${OUT_APK}.aligned"
+            SIGNING_MODE="Custom release keystore"
+          else
+            cp "$SRC_APK" "$OUT_APK"
+            SIGNING_MODE="Default Expo signing"
+          fi
+
+          APK_SIZE="$(du -h "$OUT_APK" | cut -f1)"
+          echo "apk_path=${OUT_APK}" >> "$GITHUB_OUTPUT"
+          echo "apk_name=${APK_NAME}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Android APK Build Succeeded"
+            echo ""
+            echo "- **File**: \`${APK_NAME}\`"
+            echo "- **Variant**: \`${BUILD_TYPE}\`"
+            echo "- **Architectures**: \`${REACT_NATIVE_ARCHS}\`"
+            echo "- **Signing**: ${SIGNING_MODE}"
+            echo "- **Size**: \`${APK_SIZE}\`"
+            echo "- **Commit**: \`${SHORT_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package_apk.outputs.apk_name }}
+          path: ${{ steps.package_apk.outputs.apk_path }}
+          retention-days: 30
+          if-no-files-found: error
