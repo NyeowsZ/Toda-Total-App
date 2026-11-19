@@ -1,0 +1,1112 @@
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Linear Tally &amp; Aggregation Terminal</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#B45309',
+        'success': '#047857',
+        'warning': '#B45309',
+        'error': '#B91C1C',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#0F172A',
+        'light-surface-container': '#F8FAFC',
+        'light-surface-container-high': '#E2E8F0',
+        'light-outline': '#475569',
+        'dark-primary': '#F8FAFC',
+        'dark-on-primary': '#0F172A',
+        'dark-surface': '#090D16',
+        'dark-on-surface': '#F8FAFC',
+        'dark-surface-container': '#131B2E',
+        'dark-surface-container-high': '#1E293B',
+        'dark-outline': '#94A3B8',
+      },
+      borderRadius: {
+        'sm': '4px',
+        'DEFAULT': '8px',
+        'md': '10px',
+        'lg': '12px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '12px',
+        'gutter-lg': '16px',
+        'gutter-xl': '24px',
+        'section': '32px',
+        'page-margin': '16px',
+      },
+      fontFamily: {
+        'display': ['"Mulish"', 'sans-serif'],
+        'headline': ['"Mulish"', 'sans-serif'],
+        'title': ['"Instrument Sans"', 'sans-serif'],
+        'body': ['"Instrument Sans"', 'sans-serif'],
+        'label': ['"Instrument Sans"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['56px', { lineHeight: '64px', letterSpacing: '-1px', fontWeight: '700' }],
+        'display-lg-mobile': ['32px', { lineHeight: '38px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'headline-lg': ['36px', { lineHeight: '44px', letterSpacing: '-0.5px', fontWeight: '700' }],
+        'headline-lg-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.25px', fontWeight: '700' }],
+        'headline-md': ['24px', { lineHeight: '32px', fontWeight: '600' }],
+        'title-md': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+        'body-md': ['15px', { lineHeight: '22px', fontWeight: '400' }],
+        'label-lg': ['14px', { lineHeight: '20px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', fontWeight: '600' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.5px', fontWeight: '600' }],
+      },
+      transitionDuration: {
+        'tap': '60ms',
+        'mode-switch': '120ms',
+      },
+      transitionDelay: {
+        'tap': '0ms',
+        'mode-switch': '0ms',
+      },
+      transitionTimingFunction: {
+        'tap': 'cubic-bezier(0, 0, 0.2, 1)',
+        'mode-switch': 'cubic-bezier(0, 0, 0.2, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=Mulish:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      line-height: 1 !important;
+      box-sizing: content-box;
+      overflow: hidden;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: middle;
+    }
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #F8FAFC;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-light-surface text-light-on-surface min-h-[1024px] overflow-hidden antialiased font-body select-none" data-stitch-vh="min-h-[1024px]===min-h-screen">
+  <!-- Landscape Container (Seamless Modern Borderless Layout) -->
+  <div id="app" class="w-full h-[1024px] max-h-[1024px] flex flex-row overflow-hidden bg-light-surface" data-stitch-vh="h-[1024px]===h-screen|||max-h-[1024px]===max-h-screen">
+    
+    <!-- LEFT DISPLAY STAGE -->
+    <main id="mainStage" class="w-[60%] h-full flex flex-col justify-between p-5 sm:p-6 bg-light-surface relative transition-all duration-300">
+      
+      <!-- Top Bar: Clean Borderless Modern Past Info -->
+      <header class="w-full flex items-center justify-between pb-4">
+        <!-- Clean borderless top info -->
+        <div id="pastInfoContainer" class="flex items-center gap-3">
+          <div class="flex items-baseline gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-accent animate-pulse inline-block self-center"></span>
+            <span id="pastInfoText" class="font-headline text-headline-md font-bold text-light-on-surface tabular-nums">#002 · 1</span>
+          </div>
+
+          <div id="confirmedBnBadge" class="hidden items-center gap-1.5 px-3 py-1 bg-light-surface-container-high/60 rounded-xl text-light-on-surface font-headline text-title-md font-bold tabular-nums">
+            <span class="text-label-sm font-label text-light-outline">BN</span>
+            <span id="confirmedBnVal">611</span>
+          </div>
+        </div>
+
+        <!-- Mode Indicators & Modern Floating Controls -->
+        <div class="flex items-center gap-2">
+          <!-- Totals View Switcher -->
+          <button id="totalsModeBtn" type="button" class="flex items-center gap-2 px-4 py-2 bg-light-surface-container/80 hover:bg-light-surface-container-high rounded-xl font-label text-label-lg font-bold text-light-on-surface active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-title-md text-success">analytics</span>
+            <span id="totalsBtnLabel">Totals</span>
+          </button>
+          
+          <!-- Options Trigger -->
+          <button id="batchActionsBtn" type="button" class="flex items-center justify-center w-10 h-10 rounded-xl bg-light-surface-container/80 hover:bg-light-surface-container-high active:scale-95 transition-all text-light-on-surface" title="Batch Options">
+            <span class="material-symbols-outlined text-title-md">more_horiz</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Center Stage Area -->
+      <section id="centerStage" class="flex-1 flex flex-col justify-center items-center py-2 relative overflow-hidden">
+        
+        <!-- 1. NUMERIC CAPTURE VIEW -->
+        <div id="viewCapture" class="w-full flex-1 flex flex-col justify-center items-center px-4 relative">
+          
+          <!-- Unified Transition Container -->
+          <div id="captureStageContainer" class="w-full max-w-xl flex items-center justify-center transition-all duration-300 ease-out">
+            
+            <!-- Body Number Slot (starts centered in STEP_BN, slides left in STEP_AMOUNT) -->
+            <div id="bnSlot" class="flex flex-col items-center justify-center transition-all duration-300 ease-out transform translate-x-0 w-full">
+              <span id="bnFieldLabel" class="text-label-sm font-label uppercase tracking-widest text-light-outline font-bold mb-1">BODY NO.</span>
+              <div class="flex items-baseline justify-center">
+                <span id="bnDisplay" class="font-display text-display-lg sm:text-[68px] font-extrabold tracking-tight text-light-on-surface tabular-nums">
+                  611
+                </span>
+                <span id="bnCaret" class="inline-block w-1.5 h-12 sm:h-14 bg-light-primary ml-1.5 animate-pulse"></span>
+              </div>
+            </div>
+
+            <!-- Soft Tonal Divider without harsh borders (visible in STEP_AMOUNT) -->
+            <div id="stageDivider" class="hidden h-24 w-0.5 bg-light-surface-container-high mx-6 transition-opacity duration-300 opacity-0"></div>
+
+            <!-- Tally/Amount Slot (appears on right side in STEP_AMOUNT) -->
+            <div id="amountSlot" class="hidden flex-col items-center justify-center transition-all duration-300 ease-out opacity-0 translate-x-4 w-1/2">
+              <span class="text-label-sm font-label uppercase tracking-widest text-success font-bold mb-1">TALLY / QTY</span>
+              <div class="flex items-baseline justify-center">
+                <span id="amountDisplay" class="font-display text-display-lg sm:text-[68px] font-extrabold tracking-tight text-success tabular-nums px-2 rounded-lg transition-colors">
+                  1
+                </span>
+                <span id="amountCaret" class="inline-block w-1.5 h-12 sm:h-14 bg-success ml-1.5 animate-pulse"></span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom guidance hint -->
+          <div id="stepGuidance" class="mt-4 text-center">
+            <span id="guidanceText" class="text-label-sm font-label text-light-outline">Type body number, then press Enter</span>
+          </div>
+        </div>
+
+        <!-- 2. HISTORY TAPE VIEW -->
+        <div id="viewHistory" class="hidden w-full h-full flex flex-col pt-1">
+          <div class="flex items-center justify-between pb-2 px-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-label-lg text-light-outline">receipt_long</span>
+              <span class="font-label text-label-sm font-bold uppercase tracking-wider text-light-outline">CHRONOLOGICAL TAPE</span>
+            </div>
+            <span id="historyRowCount" class="font-label text-label-sm text-light-outline font-semibold">3 records</span>
+          </div>
+          
+          <div class="w-full flex-1 rounded-2xl overflow-hidden flex flex-col bg-light-surface-container/70">
+            <div class="grid grid-cols-12 bg-light-surface-container-high/60 py-2 px-4 text-label-sm font-label font-bold text-light-outline uppercase">
+              <div class="col-span-3">INDEX</div>
+              <div class="col-span-5">BODY NO.</div>
+              <div class="col-span-4 text-right">AMOUNT</div>
+            </div>
+            <div id="historyTableBody" class="flex-1 overflow-y-auto custom-scroll divide-y divide-light-surface-container-high/50 bg-light-surface/80">
+            </div>
+          </div>
+          <div class="pt-2 flex items-center justify-between text-label-sm text-light-outline font-label">
+            <span>Tap any row to inspect/edit</span>
+            <button id="closeHistoryBtn" type="button" class="text-accent font-bold hover:underline">Resume Entry</button>
+          </div>
+        </div>
+
+        <!-- 3. TOTALS STEPPER VIEW: Ultra-clean, massive typography, zero clutter -->
+        <div id="viewTotals" class="hidden w-full h-full flex flex-col justify-center items-center py-4 relative">
+          <div class="w-full max-w-3xl flex items-center justify-around py-6">
+            <div class="flex flex-col items-center flex-1">
+              <span class="text-label-md sm:text-label-lg font-label text-light-outline uppercase tracking-widest mb-3 font-bold">BODY NUMBER</span>
+              <span id="totalsActiveBn" class="font-display text-[84px] sm:text-[112px] md:text-[132px] font-extrabold leading-none text-light-on-surface tabular-nums">#002</span>
+            </div>
+            
+            <div class="h-36 sm:h-48 w-0.5 bg-light-surface-container-high mx-6 sm:mx-10"></div>
+            
+            <div class="flex flex-col items-center flex-1">
+              <span class="text-label-md sm:text-label-lg font-label text-light-outline uppercase tracking-widest mb-3 font-bold">TOTAL TALLY</span>
+              <span id="totalsActiveSum" class="font-display text-[84px] sm:text-[112px] md:text-[132px] font-extrabold leading-none text-success tabular-nums">155</span>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Bottom Bar: Borderless Flow -->
+      <footer class="w-full flex items-center justify-between pt-3">
+        <div class="flex items-center gap-3">
+          <div id="modeStatusBadge" class="flex items-center gap-1.5 px-3.5 py-1.5 bg-light-primary text-light-on-primary rounded-xl font-headline text-headline-md font-bold tabular-nums shadow-sm">
+            <span id="modeStatusText">#1</span>
+          </div>
+          <span id="modeStatusDesc" class="text-body-md font-body text-light-outline font-medium">Next sequential slip</span>
+        </div>
+
+        <div id="auxActionsRow" class="flex items-center gap-2">
+          <button id="insertNextBtn" type="button" class="hidden items-center gap-1.5 px-4 py-2 bg-accent text-light-on-primary rounded-xl font-label text-label-md font-bold active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-title-md">add_circle</span>
+            <span>Insert Next</span>
+          </button>
+          
+          <button id="doneSpliceBtn" type="button" class="hidden items-center gap-1.5 px-4 py-2 bg-success text-light-on-primary rounded-xl font-label text-label-md font-bold active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-title-md">check</span>
+            <span>Done</span>
+          </button>
+
+          <button id="deleteRowBtn" type="button" class="hidden items-center gap-1.5 px-4 py-2 bg-error text-light-on-primary rounded-xl font-label text-label-md font-bold active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-title-md">delete</span>
+            <span>Delete</span>
+          </button>
+        </div>
+      </footer>
+
+    </main>
+
+    <!-- RIGHT FIXED NUMPAD / CONTROLS PANEL -->
+    <aside id="rightPanel" class="w-[40%] h-full flex flex-col p-4 sm:p-5 bg-light-surface-container-high select-none relative transition-all duration-300">
+      
+      <!-- Keypad Grid (Standard Capture Mode) -->
+      <div id="standardNumpad" class="grid grid-cols-4 grid-rows-4 gap-2.5 flex-1 w-full h-full">
+        
+        <!-- ROW 1 -->
+        <button id="keyHistory" type="button" aria-label="History Log" class="flex flex-col items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-label text-light-on-surface active:scale-95 transition-all shadow-sm">
+          <span class="material-symbols-outlined text-headline-md text-light-outline">history</span>
+          <span class="text-label-sm font-semibold mt-0.5">History</span>
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="7">
+          7
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="8">
+          8
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="9">
+          9
+        </button>
+
+        <!-- ROW 2: Step Next -->
+        <button id="keyFwd" type="button" aria-label="Step Forward" class="flex flex-col items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-label text-light-on-surface active:scale-95 transition-all shadow-sm">
+          <span class="material-symbols-outlined text-headline-md text-light-outline">fast_forward</span>
+          <span class="text-label-sm font-semibold mt-0.5">Next</span>
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="4">
+          4
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="5">
+          5
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="6">
+          6
+        </button>
+
+        <!-- ROW 3: Step Prev -->
+        <button id="keyBack" type="button" aria-label="Step Back" class="flex flex-col items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-label text-light-on-surface active:scale-95 transition-all shadow-sm">
+          <span class="material-symbols-outlined text-headline-md text-light-outline">fast_rewind</span>
+          <span class="text-label-sm font-semibold mt-0.5">Prev</span>
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="1">
+          1
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="2">
+          2
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="3">
+          3
+        </button>
+
+        <!-- ROW 4 -->
+        <button id="keyDel" type="button" aria-label="Backspace or Delete" class="flex flex-col items-center justify-center bg-light-surface hover:bg-error/10 rounded-2xl font-label text-error active:scale-95 transition-all shadow-sm">
+          <span class="material-symbols-outlined text-headline-md">backspace</span>
+          <span class="text-label-sm font-semibold mt-0.5">Clear</span>
+        </button>
+        <button type="button" class="numpad-digit flex items-center justify-center bg-light-surface hover:bg-light-surface-container-high rounded-2xl font-headline text-headline-lg font-extrabold text-light-on-surface active:scale-95 transition-all shadow-sm" data-digit="0">
+          0
+        </button>
+        <button id="keyEnter" type="button" class="col-span-2 flex items-center justify-center bg-light-primary hover:bg-light-primary/90 text-light-on-primary rounded-2xl font-headline text-headline-md font-bold active:scale-[0.98] transition-all shadow-md">
+          <span class="flex items-center gap-2">
+            <span>Enter</span>
+            <span class="material-symbols-outlined text-title-md">keyboard_return</span>
+          </span>
+        </button>
+
+      </div>
+
+      <!-- Dedicated Minimalist Stepper Controls during TOTALS Mode (Vertical Stack, compact width) -->
+      <div id="totalsControls" class="hidden flex-col justify-between flex-1 w-full h-full gap-4">
+        <!-- Progress Indicator -->
+        <div class="flex items-center justify-between px-2 pt-1">
+          <span class="text-label-sm font-label text-light-outline font-semibold uppercase tracking-wider">Progress</span>
+          <span id="totalsStepCount" class="font-headline text-headline-md font-bold text-light-on-surface tabular-nums">1 / 3</span>
+        </div>
+
+        <!-- Stepper Buttons Stack -->
+        <div class="flex-1 flex flex-col justify-center gap-3">
+          <!-- Next Button (Dominant Primary Forward Motion with Check confirmation) -->
+          <button id="totalsNextBtn" type="button" aria-label="Next Body Number" class="w-full flex-1 flex flex-col items-center justify-center bg-light-primary hover:bg-light-primary/90 text-light-on-primary rounded-3xl active:scale-[0.98] transition-all shadow-md group py-6">
+            <span id="totalsNextIcon" class="material-symbols-outlined text-[52px] sm:text-[64px] leading-none group-hover:translate-x-1.5 transition-transform">arrow_forward</span>
+            <span id="totalsNextLabel" class="font-headline text-headline-md sm:text-headline-lg font-bold mt-2">Next</span>
+          </button>
+
+          <!-- Prev Button (Secondary Navigation) -->
+          <button id="totalsPrevBtn" type="button" aria-label="Previous Body Number" class="w-full h-20 flex items-center justify-center gap-2 bg-light-surface hover:bg-light-surface-container rounded-2xl text-light-on-surface active:scale-[0.98] transition-all shadow-sm group">
+            <span class="material-symbols-outlined text-headline-md text-light-outline group-hover:-translate-x-1 transition-transform">arrow_back</span>
+            <span class="font-label text-label-lg font-bold">Previous</span>
+          </button>
+        </div>
+
+        <!-- Exit Totals Button (Distinct, Clear Button Style) -->
+        <button id="exitTotalsModeBtn" type="button" class="w-full py-3.5 px-4 bg-light-surface hover:bg-light-surface-container border border-light-outline/20 rounded-2xl text-light-on-surface hover:text-error font-label text-label-md font-bold transition-all shadow-sm flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-title-md text-light-outline">logout</span>
+          <span>Exit Totals</span>
+        </button>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- Modal Dialog -->
+  <dialog id="batchModal" class="p-0 rounded-lg shadow-xl backdrop:bg-light-primary/40 border border-light-outline/30 max-w-sm w-full">
+    <div class="p-5 bg-light-surface text-light-on-surface flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-light-surface-container-high pb-2">
+        <h3 class="font-headline text-headline-md font-bold">Batch Options</h3>
+        <button id="closeModalBtn" type="button" class="text-light-outline hover:text-light-on-surface">
+          <span class="material-symbols-outlined text-headline-md">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-2 font-body text-body-md">
+        <p class="text-light-outline text-label-sm">Manage offline tally storage &amp; reporting</p>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <button id="exportCsvBtn" type="button" class="p-2.5 bg-light-surface-container hover:bg-light-surface-container-high border border-light-outline/30 rounded font-label text-label-sm font-bold flex items-center justify-center gap-1 text-light-on-surface">
+            <span class="material-symbols-outlined text-title-md">download</span>
+            Export CSV
+          </button>
+          <button id="exportJsonBtn" type="button" class="p-2.5 bg-light-surface-container hover:bg-light-surface-container-high border border-light-outline/30 rounded font-label text-label-sm font-bold flex items-center justify-center gap-1 text-light-on-surface">
+            <span class="material-symbols-outlined text-title-md">data_object</span>
+            Export JSON
+          </button>
+        </div>
+        <div class="p-3 bg-light-surface-container rounded-xl flex items-center justify-between mt-1">
+          <div class="flex flex-col pr-2">
+            <span class="font-label text-label-md font-bold text-light-on-surface">Confirm Step on Next</span>
+            <span class="font-body text-label-sm text-light-outline">First press checks off, second press advances</span>
+          </div>
+          <input id="confirmStepToggle" type="checkbox" checked class="w-5 h-5 rounded text-light-primary focus:ring-light-primary cursor-pointer">
+        </div>
+        <hr class="my-2 border-light-surface-container-high">
+        <button id="resetBatchBtn" type="button" class="w-full p-2.5 bg-error text-light-on-primary rounded font-label text-label-sm font-bold flex items-center justify-center gap-1">
+          <span class="material-symbols-outlined text-title-md">delete_forever</span>
+          Clear / New Batch
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- State Machine Scripts -->
+  <script>
+    (function() {
+      const state = {
+        entries: [
+          { bn: '611', amount: 5 },
+          { bn: '741', amount: 6 },
+          { bn: '002', amount: 1 }
+        ],
+        mode: 'APPEND_STREAM',
+        step: 'STEP_BN',
+        cursorIndex: 4,
+        insertPointer: 1,
+        bnBuffer: '611',
+        amountBuffer: '',
+        isDefaultAmount: false,
+        totalsCursor: 0,
+        totalsPendingConfirm: false,
+        confirmStepOnNext: true
+      };
+
+      try {
+        const saved = localStorage.getItem('linear_tally_batch');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            state.entries = parsed;
+            state.cursorIndex = state.entries.length + 1;
+          }
+        }
+      } catch (e) {}
+
+      function saveStorage() {
+        try {
+          localStorage.setItem('linear_tally_batch', JSON.stringify(state.entries));
+        } catch (e) {}
+      }
+
+      function computeSparseTotals(entries) {
+        const map = new Map();
+        for (const entry of entries) {
+          const key = (entry.bn || '').trim();
+          if (!key) continue;
+          const existing = map.get(key);
+          if (existing) {
+            existing.total += Number(entry.amount) || 0;
+            existing.count += 1;
+          } else {
+            map.set(key, { bn: key, total: Number(entry.amount) || 0, count: 1 });
+          }
+        }
+        return Array.from(map.values())
+          .filter(row => row.total > 0)
+          .sort((a, b) => Number(a.bn) - Number(b.bn));
+      }
+
+      const bnSlot = document.getElementById('bnSlot');
+      const bnDisplay = document.getElementById('bnDisplay');
+      const bnFieldLabel = document.getElementById('bnFieldLabel');
+      const bnCaret = document.getElementById('bnCaret');
+
+      const stageDivider = document.getElementById('stageDivider');
+
+      const amountSlot = document.getElementById('amountSlot');
+      const amountDisplay = document.getElementById('amountDisplay');
+      const amountCaret = document.getElementById('amountCaret');
+
+      const guidanceText = document.getElementById('guidanceText');
+      const confirmedBnBadge = document.getElementById('confirmedBnBadge');
+      const confirmedBnVal = document.getElementById('confirmedBnVal');
+      const pastInfoText = document.getElementById('pastInfoText');
+      const pastInfoContainer = document.getElementById('pastInfoContainer');
+      const mainStage = document.getElementById('mainStage');
+      const rightPanel = document.getElementById('rightPanel');
+
+      const standardNumpad = document.getElementById('standardNumpad');
+      const totalsControls = document.getElementById('totalsControls');
+      const totalsStepCount = document.getElementById('totalsStepCount');
+      const totalsNextBtn = document.getElementById('totalsNextBtn');
+      const totalsNextIcon = document.getElementById('totalsNextIcon');
+      const totalsNextLabel = document.getElementById('totalsNextLabel');
+      const totalsPrevBtn = document.getElementById('totalsPrevBtn');
+      const exitTotalsModeBtn = document.getElementById('exitTotalsModeBtn');
+      const confirmStepToggle = document.getElementById('confirmStepToggle');
+
+      const viewCapture = document.getElementById('viewCapture');
+      const viewHistory = document.getElementById('viewHistory');
+      const viewTotals = document.getElementById('viewTotals');
+
+      const modeStatusBadge = document.getElementById('modeStatusBadge');
+      const modeStatusText = document.getElementById('modeStatusText');
+      const modeStatusDesc = document.getElementById('modeStatusDesc');
+
+      const insertNextBtn = document.getElementById('insertNextBtn');
+      const doneSpliceBtn = document.getElementById('doneSpliceBtn');
+      const deleteRowBtn = document.getElementById('deleteRowBtn');
+      const totalsModeBtn = document.getElementById('totalsModeBtn');
+      const totalsBtnLabel = document.getElementById('totalsBtnLabel');
+
+      const historyTableBody = document.getElementById('historyTableBody');
+      const historyRowCount = document.getElementById('historyRowCount');
+      const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+
+      const totalsActiveBn = document.getElementById('totalsActiveBn');
+      const totalsActiveSum = document.getElementById('totalsActiveSum');
+      const totalsSlipCount = document.getElementById('totalsSlipCount');
+
+      const batchModal = document.getElementById('batchModal');
+      const batchActionsBtn = document.getElementById('batchActionsBtn');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const resetBatchBtn = document.getElementById('resetBatchBtn');
+      const exportCsvBtn = document.getElementById('exportCsvBtn');
+      const exportJsonBtn = document.getElementById('exportJsonBtn');
+
+      const keyEnter = document.getElementById('keyEnter');
+      const keyDel = document.getElementById('keyDel');
+      const keyFwd = document.getElementById('keyFwd');
+      const keyBack = document.getElementById('keyBack');
+      const keyHistory = document.getElementById('keyHistory');
+      const digitButtons = document.querySelectorAll('.numpad-digit');
+
+      function render() {
+        const N = state.entries.length;
+        const totalUnits = getTotalTallyUnits();
+
+        // Update Past Info strip
+        if (N > 0) {
+          const lastEntry = state.entries[N - 1];
+          pastInfoText.innerHTML = `#${lastEntry.bn} <span class="text-light-outline font-normal mx-0.5">&middot;</span> <span class="text-success font-bold">${lastEntry.amount}</span>`;
+        } else {
+          pastInfoText.textContent = 'None yet';
+        }
+
+        if (state.mode === 'HISTORY_TAPE') {
+          if (pastInfoContainer) pastInfoContainer.classList.remove('invisible', 'hidden');
+          mainStage.className = "w-[60%] h-full flex flex-col justify-between p-5 sm:p-6 bg-light-surface relative transition-all duration-300";
+          rightPanel.className = "w-[40%] h-full flex flex-col p-4 sm:p-5 bg-light-surface-container-high select-none relative transition-all duration-300";
+          viewCapture.classList.add('hidden');
+          viewTotals.classList.add('hidden');
+          viewHistory.classList.remove('hidden');
+          standardNumpad.classList.remove('hidden');
+          totalsControls.classList.add('hidden');
+          renderHistoryTable();
+        } else if (state.mode === 'TOTALS_STEPPER') {
+          // In Totals mode, hide past info container: totals screen is solely about the aggregated totals
+          if (pastInfoContainer) pastInfoContainer.classList.add('invisible');
+          // Give 72% to the main stage so the totals are massive, and 28% to the right panel for compact stepper controls
+          mainStage.className = "w-[72%] h-full flex flex-col justify-between p-6 sm:p-8 bg-light-surface relative transition-all duration-300";
+          rightPanel.className = "w-[28%] h-full flex flex-col p-4 sm:p-5 bg-light-surface-container-high select-none relative transition-all duration-300";
+          viewCapture.classList.add('hidden');
+          viewHistory.classList.add('hidden');
+          viewTotals.classList.remove('hidden');
+          standardNumpad.classList.add('hidden');
+          totalsControls.classList.remove('hidden');
+          totalsControls.classList.add('flex');
+          renderTotalsView();
+        } else {
+          if (pastInfoContainer) pastInfoContainer.classList.remove('invisible', 'hidden');
+          mainStage.className = "w-[60%] h-full flex flex-col justify-between p-5 sm:p-6 bg-light-surface relative transition-all duration-300";
+          rightPanel.className = "w-[40%] h-full flex flex-col p-4 sm:p-5 bg-light-surface-container-high select-none relative transition-all duration-300";
+          viewHistory.classList.add('hidden');
+          viewTotals.classList.add('hidden');
+          viewCapture.classList.remove('hidden');
+          standardNumpad.classList.remove('hidden');
+          totalsControls.classList.add('hidden');
+          renderCaptureView();
+        }
+
+        if (state.mode === 'APPEND_STREAM') {
+          modeStatusBadge.className = "flex items-center gap-1.5 px-3 py-1 bg-light-primary text-light-on-primary rounded font-headline text-headline-md font-bold tabular-nums";
+          const nextIndex = totalUnits + 1;
+          modeStatusText.textContent = '#' + nextIndex;
+          modeStatusDesc.textContent = state.step === 'STEP_BN' ? 'Enter Body No.' : 'Enter Tally (def: 1)';
+        } else if (state.mode === 'INSPECT_EDIT') {
+          modeStatusBadge.className = "flex items-center gap-1.5 px-3 py-1 bg-accent text-light-on-primary rounded font-headline text-headline-md font-bold tabular-nums";
+          modeStatusText.textContent = '#' + state.cursorIndex + ' (EDIT)';
+          modeStatusDesc.textContent = state.cursorIndex === 0 ? 'Virtual Head Anchor (#0)' : 'Inline record edit';
+        } else if (state.mode === 'INSERT_STREAM') {
+          modeStatusBadge.className = "flex items-center gap-1.5 px-3 py-1 bg-warning text-light-on-primary rounded font-headline text-headline-md font-bold tabular-nums";
+          modeStatusText.textContent = '+' + state.insertPointer + ' (INS)';
+          modeStatusDesc.textContent = 'Splice active (shifting subsequent)';
+        } else if (state.mode === 'HISTORY_TAPE') {
+          modeStatusBadge.className = "flex items-center gap-1.5 px-3 py-1 bg-light-primary text-light-on-primary rounded font-headline text-headline-md font-bold tabular-nums";
+          modeStatusText.textContent = 'Total: ' + totalUnits + ' units';
+          modeStatusDesc.textContent = N + ' slips logged';
+        } else if (state.mode === 'TOTALS_STEPPER') {
+          const sparse = computeSparseTotals(state.entries);
+          modeStatusBadge.className = "flex items-center gap-1.5 px-3 py-1 bg-success text-light-on-primary rounded font-headline text-headline-md font-bold tabular-nums";
+          modeStatusText.textContent = sparse.length > 0 ? (state.totalsCursor + 1) + ' / ' + sparse.length : '0 / 0';
+          modeStatusDesc.textContent = 'Totals';
+        }
+
+        insertNextBtn.classList.toggle('hidden', !(state.mode === 'INSPECT_EDIT' || (state.mode === 'HISTORY_TAPE' && state.cursorIndex <= N)));
+        deleteRowBtn.classList.toggle('hidden', !(state.mode === 'INSPECT_EDIT' && state.cursorIndex > 0 && state.cursorIndex <= N));
+        doneSpliceBtn.classList.toggle('hidden', state.mode !== 'INSERT_STREAM');
+
+        totalsBtnLabel.textContent = state.mode === 'TOTALS_STEPPER' ? 'Exit Totals' : 'Totals';
+      }
+
+      function renderCaptureView() {
+        const isAmountStep = state.step === 'STEP_AMOUNT';
+
+        // BN Display content
+        bnDisplay.textContent = state.bnBuffer ? '#' + state.bnBuffer : '—';
+        bnDisplay.classList.toggle('opacity-40', !state.bnBuffer);
+
+        if (isAmountStep) {
+          // Animate BN to left side
+          bnSlot.className = "flex flex-col items-center justify-center transition-all duration-300 ease-out w-1/2";
+          bnFieldLabel.textContent = "BODY NUMBER";
+          bnFieldLabel.className = "text-label-sm font-label uppercase tracking-widest text-light-outline font-bold mb-1";
+          bnCaret.classList.add('hidden'); // hide caret for confirmed BN
+
+          // Show vertical divider
+          stageDivider.classList.remove('hidden');
+          setTimeout(() => {
+            stageDivider.classList.remove('opacity-0');
+            stageDivider.classList.add('opacity-100');
+          }, 10);
+
+          // Reveal Tally / Amount slot on the right
+          amountSlot.classList.remove('hidden');
+          amountSlot.classList.add('flex');
+          setTimeout(() => {
+            amountSlot.classList.remove('opacity-0', 'translate-x-4');
+            amountSlot.classList.add('opacity-100', 'translate-x-0');
+          }, 20);
+
+          amountDisplay.textContent = state.amountBuffer || '0';
+          amountDisplay.classList.toggle('opacity-40', !state.amountBuffer);
+          
+          // Operator visual cue: if default 1 is present, highlight as 'selected / replace-on-type'
+          if (state.isDefaultAmount) {
+            amountDisplay.className = "font-display text-display-lg sm:text-[68px] font-extrabold tracking-tight text-success tabular-nums px-3 py-0.5 bg-success/15 ring-2 ring-success/50 rounded-xl transition-all shadow-sm";
+            guidanceText.innerHTML = 'Press <strong class="text-light-on-surface">Enter</strong> to accept default <strong>1</strong>, or type new count';
+          } else {
+            amountDisplay.className = "font-display text-display-lg sm:text-[68px] font-extrabold tracking-tight text-success tabular-nums px-2 rounded-lg transition-all";
+            guidanceText.textContent = 'Enter slip count / quantity, then press Enter';
+          }
+          amountCaret.classList.remove('hidden');
+
+          // Context header badge
+          confirmedBnBadge.classList.remove('hidden');
+          confirmedBnBadge.classList.add('flex');
+          confirmedBnVal.textContent = state.bnBuffer;
+        } else {
+          // BN centered at center stage
+          bnSlot.className = "flex flex-col items-center justify-center transition-all duration-300 ease-out w-full";
+          bnFieldLabel.textContent = "BODY NO.";
+          bnFieldLabel.className = "text-label-sm font-label uppercase tracking-widest text-light-outline font-bold mb-1";
+          bnCaret.classList.remove('hidden');
+
+          // Hide Divider
+          stageDivider.classList.add('opacity-0');
+          stageDivider.classList.remove('opacity-100');
+          setTimeout(() => {
+            if (state.step === 'STEP_BN') stageDivider.classList.add('hidden');
+          }, 200);
+
+          // Hide Amount slot
+          amountSlot.classList.add('opacity-0', 'translate-x-4');
+          amountSlot.classList.remove('opacity-100', 'translate-x-0');
+          setTimeout(() => {
+            if (state.step === 'STEP_BN') {
+              amountSlot.classList.add('hidden');
+              amountSlot.classList.remove('flex');
+            }
+          }, 200);
+
+          confirmedBnBadge.classList.add('hidden');
+          confirmedBnBadge.classList.remove('flex');
+
+          if (state.mode === 'INSPECT_EDIT') {
+            guidanceText.textContent = 'Editing existing slip record. Press Enter to change tally.';
+          } else if (state.mode === 'INSERT_STREAM') {
+            guidanceText.textContent = 'Insert new slip into stack. Press Done when finished.';
+          } else {
+            guidanceText.textContent = 'Type body number, then press Enter';
+          }
+        }
+      }
+
+      function renderHistoryTable() {
+        historyRowCount.textContent = state.entries.length + (state.entries.length === 1 ? ' record' : ' records');
+        historyTableBody.innerHTML = '';
+
+        if (state.entries.length === 0) {
+          historyTableBody.innerHTML = '<div class="p-6 text-center text-light-outline font-label">No tally entries in batch yet.</div>';
+          return;
+        }
+
+        state.entries.forEach((entry, idx) => {
+          const row1Index = idx + 1;
+          const isSelected = state.cursorIndex === row1Index;
+          const tr = document.createElement('div');
+          tr.className = `grid grid-cols-12 py-2 px-3 items-center cursor-pointer transition-colors ${isSelected ? 'bg-accent/15 border-l-4 border-accent' : 'hover:bg-light-surface-container'}`;
+          tr.innerHTML = `
+            <div class="col-span-3 font-headline text-headline-md font-bold text-light-outline tabular-nums">#${row1Index}</div>
+            <div class="col-span-5 font-headline text-headline-md font-extrabold text-light-on-surface tabular-nums">${entry.bn}</div>
+            <div class="col-span-4 text-right font-headline text-headline-md font-black text-light-on-surface tabular-nums">${entry.amount}</div>
+          `;
+          tr.onclick = function() {
+            state.cursorIndex = row1Index;
+            state.mode = 'INSPECT_EDIT';
+            state.step = 'STEP_BN';
+            state.bnBuffer = entry.bn;
+            state.amountBuffer = String(entry.amount);
+            render();
+          };
+          historyTableBody.appendChild(tr);
+        });
+      }
+
+      function renderTotalsView() {
+        const sparse = computeSparseTotals(state.entries);
+        if (sparse.length === 0) {
+          if (totalsStepCount) totalsStepCount.textContent = '0 / 0';
+          totalsActiveBn.textContent = '—';
+          totalsActiveSum.textContent = '0';
+          if (totalsSlipCount) totalsSlipCount.textContent = '';
+          return;
+        }
+
+        if (state.totalsCursor >= sparse.length) state.totalsCursor = sparse.length - 1;
+        if (state.totalsCursor < 0) state.totalsCursor = 0;
+
+        const current = sparse[state.totalsCursor];
+        if (totalsStepCount) totalsStepCount.textContent = (state.totalsCursor + 1) + ' / ' + sparse.length;
+        totalsActiveBn.textContent = '#' + current.bn;
+        totalsActiveSum.textContent = current.total;
+        if (totalsSlipCount) totalsSlipCount.textContent = '';
+
+        // Two-step Next confirmation presentation (Green + Check icon only, no redundant text)
+        if (totalsNextIcon && totalsNextLabel && totalsNextBtn) {
+          if (state.totalsPendingConfirm) {
+            totalsNextIcon.textContent = 'check';
+            totalsNextLabel.textContent = 'Next';
+            totalsNextBtn.className = "w-full flex-1 flex flex-col items-center justify-center bg-success hover:bg-success/90 text-light-on-primary rounded-3xl active:scale-[0.98] transition-all shadow-md group py-6";
+          } else {
+            totalsNextIcon.textContent = 'arrow_forward';
+            totalsNextLabel.textContent = 'Next';
+            totalsNextBtn.className = "w-full flex-1 flex flex-col items-center justify-center bg-light-primary hover:bg-light-primary/90 text-light-on-primary rounded-3xl active:scale-[0.98] transition-all shadow-md group py-6";
+          }
+        }
+      }
+
+      // Helper to compute cumulative tally units count (derives live sequential index)
+      function getTotalTallyUnits() {
+        return state.entries.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      }
+
+      function handleDigit(digit) {
+        if (state.mode === 'TOTALS_STEPPER') {
+          state.bnBuffer += digit;
+          return;
+        }
+
+        if (state.step === 'STEP_BN') {
+          state.bnBuffer += digit;
+        } else {
+          // If in STEP_AMOUNT and buffer is untouched default '1', replacing with pressed digit gives instant single-digit override
+          if (state.amountBuffer === '1' && state.isDefaultAmount) {
+            state.amountBuffer = digit;
+            state.isDefaultAmount = false;
+          } else {
+            state.amountBuffer += digit;
+            state.isDefaultAmount = false;
+          }
+        }
+        render();
+      }
+
+      function handleDel() {
+        if (state.mode === 'TOTALS_STEPPER') {
+          state.bnBuffer = state.bnBuffer.slice(0, -1);
+          return;
+        }
+
+        if (state.step === 'STEP_AMOUNT') {
+          if (state.amountBuffer.length > 0) {
+            state.amountBuffer = state.amountBuffer.slice(0, -1);
+            state.isDefaultAmount = false;
+          } else {
+            state.step = 'STEP_BN';
+          }
+        } else {
+          if (state.bnBuffer.length > 0) {
+            state.bnBuffer = state.bnBuffer.slice(0, -1);
+          } else if (state.mode === 'INSPECT_EDIT' && state.cursorIndex > 0 && state.cursorIndex <= state.entries.length) {
+            deleteCurrentEntry();
+          }
+        }
+        render();
+      }
+
+      function handleEnter() {
+        if (state.mode === 'TOTALS_STEPPER') {
+          if (state.bnBuffer) {
+            const sparse = computeSparseTotals(state.entries);
+            const target = state.bnBuffer.trim();
+            const idx = sparse.findIndex(row => row.bn === target || Number(row.bn) === Number(target));
+            if (idx !== -1) {
+              state.totalsCursor = idx;
+            }
+            state.bnBuffer = '';
+            render();
+          }
+          return;
+        }
+
+        if (state.step === 'STEP_BN') {
+          if (state.bnBuffer.trim().length === 0) return;
+          state.step = 'STEP_AMOUNT';
+          if (state.mode !== 'INSPECT_EDIT') {
+            state.amountBuffer = '1'; // Default tally to 1
+            state.isDefaultAmount = true;
+          }
+          render();
+        } else if (state.step === 'STEP_AMOUNT') {
+          const bufferToParse = state.amountBuffer.trim() || '1';
+          const parsedAmount = parseInt(bufferToParse, 10);
+          if (isNaN(parsedAmount) || parsedAmount <= 0) return;
+
+          const record = {
+            bn: state.bnBuffer.trim(),
+            amount: parsedAmount
+          };
+
+          if (state.mode === 'APPEND_STREAM') {
+            state.entries.push(record);
+            saveStorage();
+            state.cursorIndex = state.entries.length + 1;
+            state.step = 'STEP_BN';
+            state.bnBuffer = '';
+            state.amountBuffer = '';
+            state.isDefaultAmount = false;
+          } else if (state.mode === 'INSERT_STREAM') {
+            const zeroIdx = state.insertPointer - 1;
+            state.entries.splice(zeroIdx, 0, record);
+            saveStorage();
+            state.insertPointer += 1;
+            state.step = 'STEP_BN';
+            state.bnBuffer = '';
+            state.amountBuffer = '';
+            state.isDefaultAmount = false;
+          } else if (state.mode === 'INSPECT_EDIT') {
+            if (state.cursorIndex >= 1 && state.cursorIndex <= state.entries.length) {
+              state.entries[state.cursorIndex - 1] = record;
+              saveStorage();
+            }
+            state.mode = 'APPEND_STREAM';
+            state.cursorIndex = state.entries.length + 1;
+            state.step = 'STEP_BN';
+            state.bnBuffer = '';
+            state.amountBuffer = '';
+            state.isDefaultAmount = false;
+          }
+
+          render();
+        }
+      }
+
+      function handleBack() {
+        if (state.mode === 'TOTALS_STEPPER') {
+          state.totalsPendingConfirm = false;
+          const sparse = computeSparseTotals(state.entries);
+          if (state.totalsCursor > 0) {
+            state.totalsCursor -= 1;
+            render();
+          }
+          return;
+        }
+
+        const N = state.entries.length;
+        if (state.mode === 'APPEND_STREAM') {
+          if (N > 0) {
+            state.cursorIndex = N;
+            state.mode = 'INSPECT_EDIT';
+            state.step = 'STEP_BN';
+            state.bnBuffer = state.entries[N - 1].bn;
+            state.amountBuffer = String(state.entries[N - 1].amount);
+          }
+        } else if (state.mode === 'INSPECT_EDIT') {
+          if (state.cursorIndex > 0) {
+            state.cursorIndex -= 1;
+            if (state.cursorIndex === 0) {
+              state.bnBuffer = '';
+              state.amountBuffer = '';
+            } else {
+              state.bnBuffer = state.entries[state.cursorIndex - 1].bn;
+              state.amountBuffer = String(state.entries[state.cursorIndex - 1].amount);
+            }
+          }
+        }
+        render();
+      }
+
+      function handleFwd() {
+        if (state.mode === 'TOTALS_STEPPER') {
+          const sparse = computeSparseTotals(state.entries);
+          if (state.confirmStepOnNext && !state.totalsPendingConfirm) {
+            state.totalsPendingConfirm = true;
+            render();
+            return;
+          }
+          state.totalsPendingConfirm = false;
+          if (state.totalsCursor < sparse.length - 1) {
+            state.totalsCursor += 1;
+          }
+          render();
+          return;
+        }
+
+        const N = state.entries.length;
+        if (state.mode === 'INSPECT_EDIT') {
+          if (state.cursorIndex < N) {
+            state.cursorIndex += 1;
+            state.bnBuffer = state.entries[state.cursorIndex - 1].bn;
+            state.amountBuffer = String(state.entries[state.cursorIndex - 1].amount);
+          } else {
+            state.mode = 'APPEND_STREAM';
+            state.cursorIndex = N + 1;
+            state.step = 'STEP_BN';
+            state.bnBuffer = '';
+            state.amountBuffer = '';
+          }
+          render();
+        }
+      }
+
+      function deleteCurrentEntry() {
+        if (state.cursorIndex >= 1 && state.cursorIndex <= state.entries.length) {
+          state.entries.splice(state.cursorIndex - 1, 1);
+          saveStorage();
+          const N = state.entries.length;
+          if (N === 0) {
+            state.mode = 'APPEND_STREAM';
+            state.cursorIndex = 1;
+            state.step = 'STEP_BN';
+            state.bnBuffer = '';
+            state.amountBuffer = '';
+          } else if (state.cursorIndex > N) {
+            state.cursorIndex = N;
+            state.bnBuffer = state.entries[N - 1].bn;
+            state.amountBuffer = String(state.entries[N - 1].amount);
+          } else {
+            state.bnBuffer = state.entries[state.cursorIndex - 1].bn;
+            state.amountBuffer = String(state.entries[state.cursorIndex - 1].amount);
+          }
+          render();
+        }
+      }
+
+      digitButtons.forEach(btn => {
+        btn.addEventListener('click', () => handleDigit(btn.getAttribute('data-digit')));
+      });
+
+      keyDel.addEventListener('click', handleDel);
+      keyEnter.addEventListener('click', handleEnter);
+      keyBack.addEventListener('click', handleBack);
+      keyFwd.addEventListener('click', handleFwd);
+
+      keyHistory.addEventListener('click', () => {
+        if (state.mode === 'HISTORY_TAPE') {
+          state.mode = 'APPEND_STREAM';
+          state.cursorIndex = state.entries.length + 1;
+          state.step = 'STEP_BN';
+          state.bnBuffer = '';
+          state.amountBuffer = '';
+        } else {
+          state.mode = 'HISTORY_TAPE';
+        }
+        render();
+      });
+
+      closeHistoryBtn.addEventListener('click', () => {
+        state.mode = 'APPEND_STREAM';
+        state.cursorIndex = state.entries.length + 1;
+        state.step = 'STEP_BN';
+        state.bnBuffer = '';
+        state.amountBuffer = '';
+        render();
+      });
+
+      totalsModeBtn.addEventListener('click', () => {
+        state.totalsPendingConfirm = false;
+        if (state.mode === 'TOTALS_STEPPER') {
+          state.mode = 'APPEND_STREAM';
+          state.cursorIndex = state.entries.length + 1;
+          state.step = 'STEP_BN';
+          state.bnBuffer = '';
+          state.amountBuffer = '';
+        } else {
+          state.mode = 'TOTALS_STEPPER';
+          state.totalsCursor = 0;
+          state.bnBuffer = '';
+        }
+        render();
+      });
+
+      totalsNextBtn.addEventListener('click', handleFwd);
+      totalsPrevBtn.addEventListener('click', handleBack);
+      exitTotalsModeBtn.addEventListener('click', () => {
+        state.totalsPendingConfirm = false;
+        state.mode = 'APPEND_STREAM';
+        state.cursorIndex = state.entries.length + 1;
+        state.step = 'STEP_BN';
+        state.bnBuffer = '';
+        state.amountBuffer = '';
+        render();
+      });
+
+      if (confirmStepToggle) {
+        confirmStepToggle.checked = state.confirmStepOnNext;
+        confirmStepToggle.addEventListener('change', (e) => {
+          state.confirmStepOnNext = e.target.checked;
+          state.totalsPendingConfirm = false;
+          render();
+        });
+      }
+
+      insertNextBtn.addEventListener('click', () => {
+        state.insertPointer = state.cursorIndex + 1;
+        state.mode = 'INSERT_STREAM';
+        state.step = 'STEP_BN';
+        state.bnBuffer = '';
+        state.amountBuffer = '';
+        render();
+      });
+
+      doneSpliceBtn.addEventListener('click', () => {
+        state.mode = 'APPEND_STREAM';
+        state.cursorIndex = state.entries.length + 1;
+        state.step = 'STEP_BN';
+        state.bnBuffer = '';
+        state.amountBuffer = '';
+        render();
+      });
+
+      deleteRowBtn.addEventListener('click', deleteCurrentEntry);
+
+      batchActionsBtn.addEventListener('click', () => batchModal.showModal());
+      closeModalBtn.addEventListener('click', () => batchModal.close());
+
+      exportCsvBtn.addEventListener('click', () => {
+        const rows = [['Index', 'BodyNo', 'Amount']];
+        state.entries.forEach((e, i) => rows.push([i + 1, e.bn, e.amount]));
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "tally_batch.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        batchModal.close();
+      });
+
+      exportJsonBtn.addEventListener('click', () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+          entries: state.entries,
+          totals: computeSparseTotals(state.entries)
+        }, null, 2));
+        const link = document.createElement("a");
+        link.setAttribute("href", dataStr);
+        link.setAttribute("download", "tally_batch.json");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        batchModal.close();
+      });
+
+      resetBatchBtn.addEventListener('click', () => {
+        if (confirm('Clear entire active batch? This action cannot be undone.')) {
+          state.entries = [];
+          saveStorage();
+          state.mode = 'APPEND_STREAM';
+          state.cursorIndex = 1;
+          state.step = 'STEP_BN';
+          state.bnBuffer = '';
+          state.amountBuffer = '';
+          render();
+          batchModal.close();
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key >= '0' && e.key <= '9') {
+          handleDigit(e.key);
+        } else if (e.key === 'Enter') {
+          handleEnter();
+        } else if (e.key === 'Backspace') {
+          handleDel();
+        } else if (e.key === 'ArrowLeft') {
+          handleBack();
+        } else if (e.key === 'ArrowRight') {
+          handleFwd();
+        }
+      });
+
+      render();
+    })();
+  </script>
+
+
+</body></html>
