@@ -1,4 +1,3 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import Animated, {
@@ -15,6 +14,7 @@ import { BatchOptionsModal } from '@/components/terminal/BatchOptionsModal';
 import { CaptureStage } from '@/components/terminal/CaptureStage';
 import { HistoryTapeView } from '@/components/terminal/HistoryTapeView';
 import { KeypadPanel } from '@/components/terminal/KeypadPanel';
+import { TerminalIcon } from '@/components/terminal/TerminalIcon';
 import { TotalsStepperView } from '@/components/terminal/TotalsStepperView';
 import { ShadowSm, TerminalColors, TerminalFonts } from '@/constants/terminal-theme';
 import { useTallyTerminal } from '@/hooks/use-tally-terminal';
@@ -155,10 +155,16 @@ export default function TerminalScreen() {
               <PulsingStatusDot />
               {lastEntry ? (
                 <Text
-                  numberOfLines={1}
                   style={{
                     fontFamily: TerminalFonts.displayBold,
-                    fontSize: compact ? 18 : 24,
+                    fontSize:
+                      lastEntry.bn.length > 5
+                        ? compact
+                          ? 14
+                          : 18
+                        : compact
+                          ? 18
+                          : 24,
                     color: TerminalColors.onSurface,
                     fontVariant: ['tabular-nums'],
                   }}>
@@ -234,7 +240,7 @@ export default function TerminalScreen() {
                   : TerminalColors.surfaceContainer,
                 transform: [{ scale: pressed ? 0.96 : 1 }],
               })}>
-              <MaterialIcons name="analytics" size={compact ? 17 : 19} color={TerminalColors.success} />
+              <TerminalIcon name="analytics" size={compact ? 17 : 19} color={TerminalColors.success} />
               <Text
                 style={{
                   fontFamily: TerminalFonts.bodyBold,
@@ -260,7 +266,7 @@ export default function TerminalScreen() {
                   : TerminalColors.surfaceContainer,
                 transform: [{ scale: pressed ? 0.95 : 1 }],
               })}>
-              <MaterialIcons
+              <TerminalIcon
                 name="more-horiz"
                 size={compact ? 20 : 22}
                 color={TerminalColors.onSurface}
@@ -355,7 +361,7 @@ export default function TerminalScreen() {
                     transform: [{ scale: pressed ? 0.96 : 1 }],
                   },
                 ]}>
-                <MaterialIcons
+                <TerminalIcon
                   name="add-circle"
                   size={compact ? 16 : 18}
                   color={TerminalColors.onPrimary}
@@ -390,7 +396,7 @@ export default function TerminalScreen() {
                     transform: [{ scale: pressed ? 0.96 : 1 }],
                   },
                 ]}>
-                <MaterialIcons
+                <TerminalIcon
                   name="check"
                   size={compact ? 16 : 18}
                   color={TerminalColors.onPrimary}
@@ -425,7 +431,7 @@ export default function TerminalScreen() {
                     transform: [{ scale: pressed ? 0.96 : 1 }],
                   },
                 ]}>
-                <MaterialIcons
+                <TerminalIcon
                   name="delete"
                   size={compact ? 16 : 18}
                   color={TerminalColors.onPrimary}

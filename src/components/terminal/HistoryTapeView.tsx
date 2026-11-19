@@ -1,6 +1,6 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { FlatList, Pressable, Text, View } from 'react-native';
 
+import { TerminalIcon } from '@/components/terminal/TerminalIcon';
 import { TerminalColors, TerminalFonts } from '@/constants/terminal-theme';
 import type { TallyEntry } from '@/types/tally';
 
@@ -24,7 +24,7 @@ export function HistoryTapeView({
       {/* Subheader */}
       <View className="flex-row items-center justify-between pb-2 px-1">
         <View className="flex-row items-center gap-1.5">
-          <MaterialIcons name="receipt-long" size={16} color={TerminalColors.outline} />
+          <TerminalIcon name="receipt-long" size={16} color={TerminalColors.outline} />
           <Text
             style={{
               fontFamily: TerminalFonts.bodyBold,
@@ -110,6 +110,10 @@ export function HistoryTapeView({
             renderItem={({ item, index }) => {
               const row1Index = index + 1;
               const isSelected = cursorIndex === row1Index;
+              const baseRowSize = compact ? 18 : 22;
+              const bnSize = item.bn.length > 6 ? Math.max(13, baseRowSize - 4) : baseRowSize;
+              const amtStr = String(item.amount);
+              const amtSize = amtStr.length > 5 ? Math.max(13, baseRowSize - 4) : baseRowSize;
               return (
                 <Pressable
                   onPress={() => onSelectRow(row1Index)}
@@ -132,7 +136,7 @@ export function HistoryTapeView({
                     className="w-1/4"
                     style={{
                       fontFamily: TerminalFonts.displayBold,
-                      fontSize: compact ? 18 : 22,
+                      fontSize: baseRowSize,
                       color: TerminalColors.outline,
                       fontVariant: ['tabular-nums'],
                     }}>
@@ -142,7 +146,7 @@ export function HistoryTapeView({
                     className="w-5/12"
                     style={{
                       fontFamily: TerminalFonts.displayExtraBold,
-                      fontSize: compact ? 18 : 22,
+                      fontSize: bnSize,
                       color: TerminalColors.onSurface,
                       fontVariant: ['tabular-nums'],
                     }}>
@@ -152,11 +156,11 @@ export function HistoryTapeView({
                     className="w-4/12 text-right"
                     style={{
                       fontFamily: TerminalFonts.displayBlack,
-                      fontSize: compact ? 18 : 22,
+                      fontSize: amtSize,
                       color: TerminalColors.onSurface,
                       fontVariant: ['tabular-nums'],
                     }}>
-                    {item.amount}
+                    {amtStr}
                   </Text>
                 </Pressable>
               );

@@ -1,6 +1,6 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Pressable, Text, View } from 'react-native';
 
+import { TerminalIcon, type TerminalIconName } from '@/components/terminal/TerminalIcon';
 import { ShadowMd, ShadowSm, TerminalColors, TerminalFonts } from '@/constants/terminal-theme';
 import type { TerminalMode } from '@/types/tally';
 
@@ -56,7 +56,7 @@ function DigitKey({ digit, compact, onPress }: DigitKeyProps) {
 }
 
 interface ActionKeyProps {
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: TerminalIconName;
   label: string;
   accessibilityLabel: string;
   compact: boolean;
@@ -108,7 +108,7 @@ function ActionKey({
           gap: compact ? 1 : 2,
         },
       ]}>
-      <MaterialIcons name={icon} size={compact ? 20 : 24} color={iconColor} />
+      <TerminalIcon name={icon} size={compact ? 20 : 24} color={iconColor} />
       <Text
         numberOfLines={1}
         style={{
@@ -182,6 +182,7 @@ export function KeypadPanel({
               ShadowMd,
               {
                 flex: 1,
+                minHeight: compact ? 84 : 110,
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: compact ? 20 : 24,
@@ -190,20 +191,20 @@ export function KeypadPanel({
                   : TerminalColors.primary,
                 opacity: pressed ? 0.9 : 1,
                 transform: [{ scale: pressed ? 0.97 : 1 }],
-                paddingVertical: compact ? 10 : 18,
+                paddingVertical: compact ? 8 : 16,
               },
             ]}>
-            <MaterialIcons
+            <TerminalIcon
               name={totalsPendingConfirm ? 'check' : 'arrow-forward'}
-              size={compact ? 42 : 56}
+              size={compact ? 38 : 54}
               color={TerminalColors.onPrimary}
             />
             <Text
               style={{
                 fontFamily: TerminalFonts.displayBold,
-                fontSize: compact ? 20 : 26,
+                fontSize: compact ? 19 : 25,
                 color: TerminalColors.onPrimary,
-                marginTop: compact ? 4 : 8,
+                marginTop: compact ? 2 : 6,
               }}>
               Next
             </Text>
@@ -217,7 +218,7 @@ export function KeypadPanel({
             style={({ pressed }) => [
               ShadowSm,
               {
-                height: compact ? 52 : 72,
+                height: compact ? 48 : 66,
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -229,9 +230,9 @@ export function KeypadPanel({
                 transform: [{ scale: pressed ? 0.97 : 1 }],
               },
             ]}>
-            <MaterialIcons
+            <TerminalIcon
               name="arrow-back"
-              size={compact ? 20 : 24}
+              size={compact ? 19 : 23}
               color={TerminalColors.outline}
             />
             <Text
@@ -253,7 +254,7 @@ export function KeypadPanel({
           style={({ pressed }) => [
             ShadowSm,
             {
-              height: compact ? 44 : 52,
+              height: compact ? 42 : 50,
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'center',
@@ -265,7 +266,7 @@ export function KeypadPanel({
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}>
-          <MaterialIcons name="logout" size={compact ? 17 : 20} color={TerminalColors.outline} />
+          <TerminalIcon name="logout" size={compact ? 17 : 20} color={TerminalColors.outline} />
           <Text
             style={{
               fontFamily: TerminalFonts.bodyBold,
@@ -382,7 +383,7 @@ export function KeypadPanel({
             }}>
             Enter
           </Text>
-          <MaterialIcons
+          <TerminalIcon
             name="keyboard-return"
             size={compact ? 19 : 22}
             color={TerminalColors.onPrimary}

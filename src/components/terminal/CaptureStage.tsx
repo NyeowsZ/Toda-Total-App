@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -14,6 +14,7 @@ import Animated, {
 
 import { ShadowSm, TerminalColors, TerminalFonts } from '@/constants/terminal-theme';
 import type { CaptureStep, TerminalMode } from '@/types/tally';
+import { computeFitFontSize } from '@/utils/tally';
 
 interface CaptureStageProps {
   mode: TerminalMode;
@@ -66,13 +67,31 @@ export function CaptureStage({
   isDefaultAmount,
   compact,
 }: CaptureStageProps) {
+  const [stageWidth, setStageWidth] = useState(0);
   const isAmountStep = step === 'STEP_AMOUNT';
-  const digitFontSize = compact ? 52 : 68;
-  const digitLineHeight = compact ? 60 : 78;
-  const caretHeight = compact ? 42 : 54;
+  const maxDigitSize = compact ? 52 : 68;
 
   const bnDisplayText = bnBuffer ? `#${bnBuffer}` : '—';
   const amountDisplayText = amountBuffer || '0';
+
+  const effectiveWidth = stageWidth > 0 ? stageWidth : compact ? 340 : 520;
+  const dividerSpace = isAmountStep ? (compact ? 24 : 44) : 0;
+  const bnSlotAvailWidth = isAmountStep
+    ? Math.max(70, (effectiveWidth - dividerSpace) / 2 - 16)
+    : Math.max(120, effectiveWidth - 36);
+  const amountSlotAvailWidth = Math.max(70, (effectiveWidth - dividerSpace) / 2 - 42);
+
+  const bnFontSize = computeFitFontSize(bnDisplayText, bnSlotAvailWidth, maxDigitSize, 20, 0.72);
+  const amountFontSize = computeFitFontSize(
+    amountDisplayText,
+    amountSlotAvailWidth,
+    maxDigitSize,
+    20,
+    0.72
+  );
+
+  const bnCaretHeight = Math.max(20, Math.round(bnFontSize * 0.8));
+  const amountCaretHeight = Math.max(20, Math.round(amountFontSize * 0.8));
 
   const getGuidanceContent = () => {
     if (isAmountStep) {
@@ -139,7 +158,14 @@ export function CaptureStage({
   };
 
   return (
-    <View className="flex-1 w-full items-center justify-center px-3">
+    <View
+      className="flex-1 w-full items-center justify-center px-2"
+      onLayout={(e) => {
+        const w = e.nativeEvent.layout.width;
+        if (Math.abs(w - stageWidth) > 2) {
+          setStageWidth(w);
+        }
+      }}>
       {/* Main Unified Transition Container */}
       <Animated.View
         layout={LinearTransition.duration(220)}
@@ -147,7 +173,11 @@ export function CaptureStage({
         {/* Body Number Slot */}
         <Animated.View
           layout={LinearTransition.duration(220)}
-          className={isAmountStep ? 'w-1/2 items-center justify-center' : 'w-full items-center justify-center'}>
+          className={
+            isAmountStep
+              ? 'w-1/2 items-center justify-center px-1'
+              : 'w-full items-center justify-center px-1'
+          }>
           <Text
             style={{
               fontFamily: TerminalFonts.bodyBold,
@@ -161,21 +191,19 @@ export function CaptureStage({
           </Text>
           <View className="flex-row items-center justify-center">
             <Text
-              numberOfLines={1}
-              adjustsFontSizeToFit
               style={{
                 fontFamily: TerminalFonts.displayExtraBold,
-                fontSize: digitFontSize,
-                lineHeight: digitLineHeight,
+                fontSize: bnFontSize,
+                lineHeight: Math.round(bnFontSize * 1.15),
                 color: TerminalColors.onSurface,
                 opacity: bnBuffer ? 1 : 0.35,
                 fontVariant: ['tabular-nums'],
-                letterSpacing: -1,
+                letterSpacing: bnFontSize >= 44 ? -1 : -0.4,
               }}>
               {bnDisplayText}
             </Text>
             {!isAmountStep && (
-              <PulsingCaret color={TerminalColors.primary} height={caretHeight} />
+              <PulsingCaret color={TerminalColors.primary} height={bnCaretHeight} />
             )}
           </View>
         </Animated.View>
@@ -186,9 +214,9 @@ export function CaptureStage({
             <View
               style={{
                 width: 2,
-                height: compact ? 74 : 96,
+                height: compact ? 70 : 96,
                 backgroundColor: TerminalColors.surfaceContainerHigh,
-                marginHorizontal: compact ? 14 : 24,
+                marginHorizontal: compact ? 10 : 20,
                 borderRadius: 1,
               }}
             />
@@ -196,7 +224,7 @@ export function CaptureStage({
             <Animated.View
               entering={FadeInRight.duration(180)}
               exiting={FadeOutRight.duration(140)}
-              className="w-1/2 items-center justify-center">
+              className="w-1/2 items-center justify-center px-1">
               <Text
                 style={{
                   fontFamily: TerminalFonts.bodyBold,
@@ -217,31 +245,29 @@ export function CaptureStage({
                           borderColor: TerminalColors.successRing,
                           borderWidth: 2,
                           borderRadius: 14,
-                          paddingHorizontal: 14,
+                          paddingHorizontal: 12,
                           paddingVertical: 2,
                           ...ShadowSm,
                         }
                       : {
-                          paddingHorizontal: 8,
+                          paddingHorizontal: 6,
                           paddingVertical: 2,
                         }
                   }>
                   <Text
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
                     style={{
                       fontFamily: TerminalFonts.displayExtraBold,
-                      fontSize: digitFontSize,
-                      lineHeight: digitLineHeight,
+                      fontSize: amountFontSize,
+                      lineHeight: Math.round(amountFontSize * 1.15),
                       color: TerminalColors.success,
                       opacity: amountBuffer ? 1 : 0.35,
                       fontVariant: ['tabular-nums'],
-                      letterSpacing: -1,
+                      letterSpacing: amountFontSize >= 44 ? -1 : -0.4,
                     }}>
                     {amountDisplayText}
                   </Text>
                 </View>
-                <PulsingCaret color={TerminalColors.success} height={caretHeight} />
+                <PulsingCaret color={TerminalColors.success} height={amountCaretHeight} />
               </View>
             </Animated.View>
           </>

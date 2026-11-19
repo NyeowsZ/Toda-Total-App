@@ -105,3 +105,22 @@ export function triggerHaptic(type: 'light' | 'medium' | 'success' | 'warning' =
     // Ignore haptics errors on unsupported devices
   }
 }
+
+/**
+ * Computes the largest font size (within [minSize, maxSize]) that guarantees a
+ * tabular numeric string fits cleanly on a single line inside `availableWidth`
+ * without ever ellipsizing or truncating across iOS, Android, and Web.
+ */
+export function computeFitFontSize(
+  text: string,
+  availableWidth: number,
+  maxSize: number,
+  minSize = 18,
+  charWidthRatio = 0.72
+): number {
+  const safeWidth = Math.max(40, availableWidth);
+  const charCount = Math.max(1, text.length);
+  const fitted = Math.floor(safeWidth / (charCount * charWidthRatio));
+  return Math.max(minSize, Math.min(maxSize, fitted));
+}
+

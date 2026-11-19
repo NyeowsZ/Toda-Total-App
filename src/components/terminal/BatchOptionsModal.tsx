@@ -1,7 +1,7 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useState } from 'react';
 import { Modal, Pressable, Switch, Text, View } from 'react-native';
 
+import { TerminalIcon } from '@/components/terminal/TerminalIcon';
 import { ShadowMd, TerminalColors, TerminalFonts } from '@/constants/terminal-theme';
 import type { TallyEntry } from '@/types/tally';
 import { buildCsvContent, buildJsonContent, exportBatchFile } from '@/utils/tally';
@@ -107,7 +107,7 @@ export function BatchOptionsModal({
               hitSlop={10}
               accessibilityLabel="Close Batch Options"
               style={({ pressed }) => ({ opacity: pressed ? 0.55 : 1 })}>
-              <MaterialIcons name="close" size={24} color={TerminalColors.outline} />
+              <TerminalIcon name="close" size={24} color={TerminalColors.outline} />
             </Pressable>
           </View>
 
@@ -139,7 +139,7 @@ export function BatchOptionsModal({
                 borderWidth: 1,
                 borderColor: TerminalColors.outlineMuted,
               })}>
-              <MaterialIcons name="download" size={18} color={TerminalColors.onSurface} />
+              <TerminalIcon name="download" size={18} color={TerminalColors.onSurface} />
               <Text
                 style={{
                   fontFamily: TerminalFonts.bodyBold,
@@ -166,7 +166,7 @@ export function BatchOptionsModal({
                 borderWidth: 1,
                 borderColor: TerminalColors.outlineMuted,
               })}>
-              <MaterialIcons name="data-object" size={18} color={TerminalColors.onSurface} />
+              <TerminalIcon name="data-object" size={18} color={TerminalColors.onSurface} />
               <Text
                 style={{
                   fontFamily: TerminalFonts.bodyBold,
@@ -306,7 +306,7 @@ export function BatchOptionsModal({
                 backgroundColor: TerminalColors.error,
                 opacity: pressed ? 0.85 : 1,
               })}>
-              <MaterialIcons name="delete-forever" size={19} color={TerminalColors.onPrimary} />
+              <TerminalIcon name="delete-forever" size={19} color={TerminalColors.onPrimary} />
               <Text
                 style={{
                   fontFamily: TerminalFonts.bodyBold,
